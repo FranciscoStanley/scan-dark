@@ -1,0 +1,270 @@
+x-app-image: scandark/app:latest
+
+x-app-build: &app-build
+  context: .
+  dockerfile: docker/Dockerfile
+  args:
+    NEXT_PUBLIC_API_URL: http://localhost:3000
+
+x-jwt-env: &jwt-env
+  JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-docker-access-secret-minimum-32-characters}
+  JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-docker-refresh-secret-minimum-32-characters}
+
+x-db-env: &db-env
+  DATABASE_URL: postgresql://scandark:scandark_secret@postgres:5432/scandark
+  DATABASE_SYNC: ${DATABASE_SYNC:-true}
+
+x-internal-env: &internal-env
+  INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:-docker-internal-secret-minimum-32-characters}
+
+x-service-env: &service-env
+  JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-docker-access-secret-minimum-32-characters}
+  JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-docker-refresh-secret-minimum-32-characters}
+  DATABASE_URL: postgresql://scandark:scandark_secret@postgres:5432/scandark
+  DATABASE_SYNC: ${DATABASE_SYNC:-true}
+  INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:-docker-internal-secret-minimum-32-characters}
+
+x-service-health: &service-health
+  interval: 15s
+  timeout: 5s
+  retries: 5
+  start_period: 30s
+
+services:
+  # ─── Infraestrutura ───────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: scandark-postgres
+    environment:
+      POSTGRES_USER: scandark
+      POSTGRES_PASSWORD: scandark_secret
+      POSTGRES_DB: scandark
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scandark"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: scandark-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: scandark-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-scandark}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-scandark_secret}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq-init:
+    image: curlimages/curl:8.11.1
+    container_name: scandark-rabbitmq-init
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_ADMIN_USER: ${RABBITMQ_DEFAULT_USER:-scandark}
+      RABBITMQ_ADMIN_PASS: ${RABBITMQ_DEFAULT_PASS:-scandark_secret}
+      RABBITMQ_MANAGEMENT_USER: ${RABBITMQ_MANAGEMENT_USER:-admin}
+      RABBITMQ_MANAGEMENT_PASS: ${RABBITMQ_MANAGEMENT_PASS:-change-me-management-password}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        echo "Configurando usuário de gestão RabbitMQ: $$RABBITMQ_MANAGEMENT_USER"
+        curl -sf -u "$$RABBITMQ_ADMIN_USER:$$RABBITMQ_ADMIN_PASS" \
+          -X PUT "http://$$RABBITMQ_HOST:15672/api/users/$$RABBITMQ_MANAGEMENT_USER" \
+          -H "content-type: application/json" \
+          -d "{\"password\":\"$$RABBITMQ_MANAGEMENT_PASS\",\"tags\":\"administrator\"}"
+        curl -sf -u "$$RABBITMQ_ADMIN_USER:$$RABBITMQ_ADMIN_PASS" \
+          -X PUT "http://$$RABBITMQ_HOST:15672/api/permissions/%2F/$$RABBITMQ_MANAGEMENT_USER" \
+          -H "content-type: application/json" \
+          -d '{"configure":".*","write":".*","read":".*"}'
+        echo "Usuário RabbitMQ pronto: $$RABBITMQ_MANAGEMENT_USER"
+    restart: "no"
+
+  # ─── Microserviços ────────────────────────────────────────────
+  service-auth:
+    image: scandark/app:latest
+    build: *app-build
+    container_name: scandark-auth
+    command: ["node", "dist/main.js"]
+    working_dir: /app/services/service-auth
+    ports:
+      - "3001:3001"
+    environment:
+      <<: *service-env
+      REDIS_URL: redis://redis:6379
+      CORS_ORIGIN: http://localhost:3100
+      NODE_ENV: development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3001/docs > /dev/null || exit 1"]
+      <<: *service-health
+    restart: unless-stopped
+
+  service-network-scan:
+    image: scandark/app:latest
+    container_name: scandark-network-scan
+    command: ["node", "dist/main.js"]
+    working_dir: /app/services/service-network-scan
+    ports:
+      - "3002:3002"
+    environment:
+      <<: *service-env
+      DEVICE_DISCOVERY_SERVICE_URL: http://service-device-discovery:3003
+      VULNERABILITY_SERVICE_URL: http://service-vulnerability:3004
+      MONITOR_NETWORK: ${MONITOR_NETWORK:-192.168.1.0}
+      MONITOR_CIDR: ${MONITOR_CIDR:-24}
+      NODE_ENV: development
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3002/docs > /dev/null || exit 1"]
+      <<: *service-health
+    restart: unless-stopped
+
+  service-device-discovery:
+    image: scandark/app:latest
+    container_name: scandark-device-discovery
+    command: ["node", "dist/main.js"]
+    working_dir: /app/services/service-device-discovery
+    ports:
+      - "3003:3003"
+    environment:
+      <<: *service-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3003/docs > /dev/null || exit 1"]
+      <<: *service-health
+    restart: unless-stopped
+
+  service-vulnerability:
+    image: scandark/app:latest
+    container_name: scandark-vulnerability
+    command: ["node", "dist/main.js"]
+    working_dir: /app/services/service-vulnerability
+    ports:
+      - "3004:3004"
+    environment:
+      <<: *service-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3004/docs > /dev/null || exit 1"]
+      <<: *service-health
+    restart: unless-stopped
+
+  service-threat-detection:
+    image: scandark/app:latest
+    container_name: scandark-threat-detection
+    command: ["node", "dist/main.js"]
+    working_dir: /app/services/service-threat-detection
+    ports:
+      - "3005:3005"
+    environment:
+      <<: *service-env
+      IP_INTELLIGENCE_API_URL: ${IP_INTELLIGENCE_API_URL:-https://ipwho.is}
+      MONITOR_NETWORK: ${MONITOR_NETWORK:-192.168.1.0}
+      MONITOR_CIDR: ${MONITOR_CIDR:-24}
+      FIREWALL_LOG_ENABLED: ${FIREWALL_LOG_ENABLED:-true}
+      FIREWALL_LOG_PATH: ${FIREWALL_LOG_PATH:-/var/log/scandark/firewall.log}
+      FIREWALL_LOG_POLL_MS: ${FIREWALL_LOG_POLL_MS:-5000}
+      FIREWALL_INGEST_TOKEN: ${FIREWALL_INGEST_TOKEN:-}
+    volumes:
+      - ./logs:/var/log/scandark:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3005/docs > /dev/null || exit 1"]
+      <<: *service-health
+    restart: unless-stopped
+
+  service-api-gateway:
+    image: scandark/app:latest
+    container_name: scandark-gateway
+    command: ["node", "dist/main.js"]
+    working_dir: /app/services/service-api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      <<: *service-env
+      CORS_ORIGIN: http://localhost:3100
+      LICENSE_REQUIRE_ACTIVE: ${LICENSE_REQUIRE_ACTIVE:-true}
+      AUTH_SERVICE_URL: http://service-auth:3001
+      NETWORK_SCAN_SERVICE_URL: http://service-network-scan:3002
+      DEVICE_DISCOVERY_SERVICE_URL: http://service-device-discovery:3003
+      VULNERABILITY_SERVICE_URL: http://service-vulnerability:3004
+      THREAT_DETECTION_SERVICE_URL: http://service-threat-detection:3005
+    depends_on:
+      service-auth:
+        condition: service_healthy
+      service-network-scan:
+        condition: service_healthy
+      service-device-discovery:
+        condition: service_healthy
+      service-vulnerability:
+        condition: service_healthy
+      service-threat-detection:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3000/health > /dev/null || exit 1"]
+      <<: *service-health
+    restart: unless-stopped
+
+  # ─── Frontend ─────────────────────────────────────────────────
+  frontend:
+    image: scandark/app:latest
+    container_name: scandark-frontend
+    command: ["node", "frontend/server.js"]
+    working_dir: /app
+    ports:
+      - "3100:3100"
+    environment:
+      PORT: "3100"
+      HOSTNAME: "0.0.0.0"
+    depends_on:
+      service-api-gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3100 > /dev/null || exit 1"]
+      <<: *service-health
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:

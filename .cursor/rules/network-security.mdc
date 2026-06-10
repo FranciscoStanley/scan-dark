@@ -1,0 +1,37 @@
+---
+description: Segurança de rede — domínio e scanners
+globs: services/network-scan/**/*.ts,services/device-discovery/**/*.ts,services/vulnerability/**/*.ts
+alwaysApply: false
+---
+
+# Network Security Domain
+
+## Tipos de Scan (ScanType)
+
+- `network_discovery` — Ping sweep + host discovery
+- `port_scan` — TCP connect scan
+- `iot_fingerprint` — mDNS + SSDP + UPnP
+- `wifi_audit` — Criptografia, WPS, canais
+- `router_audit` — Painel admin, UPnP, credenciais
+- `full_assessment` — Todos combinados
+
+## Classificação de Dispositivos
+
+Engine em `DeviceFingerprintEngine` usa:
+- Portas abertas (RTSP→camera, RDP→computer)
+- Assinaturas IOT_SIGNATURES (vendor/banner)
+- MAC OUI prefix lookup
+
+## Vulnerabilidades
+
+Engine em `VulnerabilityAssessmentEngine` verifica:
+- Portas perigosas (Telnet, FTP, RDP, RTSP, UPnP, SNMP)
+- Regras específicas por DeviceType
+- Banners com credenciais padrão
+
+## Extensão
+
+Para adicionar novo protocolo de discovery:
+1. Interface em `IProtocolDiscovery`
+2. Implementação em `infrastructure/scanners/`
+3. Registrar no module provider

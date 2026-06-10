@@ -1,0 +1,20 @@
+{
+  "name": "@scandark/contracts",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Francisco Stanley Rodrigues Albuquerque",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "dependencies": {
+    "@scandark/shared-kernel": "workspace:*",
+    "class-validator": "^0.14.1",
+    "class-transformer": "^0.5.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

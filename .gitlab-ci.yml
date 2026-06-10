@@ -1,0 +1,71 @@
+stages:
+  - install
+  - test
+  - build
+
+variables:
+  PNPM_VERSION: "9.15.0"
+  NODE_VERSION: "20"
+  DATABASE_URL: "postgresql://scandark:scandark_secret@postgres:5432/scandark"
+  JWT_ACCESS_SECRET: "ci-access-secret-minimum-32-characters"
+  JWT_REFRESH_SECRET: "ci-refresh-secret-minimum-32-characters"
+  CORS_ORIGIN: "http://localhost:3100"
+  NEXT_PUBLIC_API_URL: "http://localhost:3000"
+
+.pnpm-setup: &pnpm_setup
+  before_script:
+    - corepack enable
+    - corepack prepare pnpm@${PNPM_VERSION} --activate
+    - pnpm config set store-dir .pnpm-store
+
+install:
+  stage: install
+  image: node:${NODE_VERSION}-alpine
+  <<: *pnpm_setup
+  script:
+    - pnpm install --frozen-lockfile
+  cache:
+    key: pnpm-${CI_COMMIT_REF_SLUG}
+    paths:
+      - .pnpm-store
+      - node_modules
+
+lint:
+  stage: test
+  image: node:${NODE_VERSION}-alpine
+  <<: *pnpm_setup
+  needs: [install]
+  script:
+    - pnpm install --frozen-lockfile
+    - pnpm lint
+
+test:
+  stage: test
+  image: node:${NODE_VERSION}-alpine
+  <<: *pnpm_setup
+  needs: [install]
+  services:
+    - name: postgres:16-alpine
+      alias: postgres
+      variables:
+        POSTGRES_USER: scandark
+        POSTGRES_PASSWORD: scandark_secret
+        POSTGRES_DB: scandark
+  script:
+    - pnpm install --frozen-lockfile
+    - pnpm test
+
+build:
+  stage: build
+  image: node:${NODE_VERSION}-alpine
+  <<: *pnpm_setup
+  needs: [lint, test]
+  script:
+    - pnpm install --frozen-lockfile
+    - pnpm build
+  artifacts:
+    paths:
+      - services/*/dist
+      - packages/*/dist
+      - frontend/.next
+    expire_in: 1 week

@@ -1,0 +1,504 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-06-09T12:00:00.000Z",
+  "__export_source": "scandark:postman-collections",
+  "resources": [
+    {
+      "_id": "wrk_scandark",
+      "_type": "workspace",
+      "name": "ScanDark",
+      "description": "Plataforma de segurança de rede — todas as APIs\n\nAutor: Francisco Stanley Rodrigues Albuquerque",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_base",
+      "_type": "environment",
+      "parentId": "wrk_scandark",
+      "name": "Base Environment",
+      "data": {},
+      "dataPropertyOrder": null,
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1000000000000
+    },
+    {
+      "_id": "env_local",
+      "_type": "environment",
+      "parentId": "env_base",
+      "name": "ScanDark Local",
+      "data": {
+        "gatewayUrl": "http://localhost:3000",
+        "authUrl": "http://localhost:3001",
+        "networkScanUrl": "http://localhost:3002",
+        "deviceDiscoveryUrl": "http://localhost:3003",
+        "vulnerabilityUrl": "http://localhost:3004",
+        "threatDetectionUrl": "http://localhost:3005",
+        "accessToken": "",
+        "scanId": "",
+        "deviceId": "",
+        "threatId": "",
+        "userEmail": "admin@your-company.com",
+        "userPassword": "ChangeMe-Secure-Password-123!"
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "gatewayUrl",
+          "authUrl",
+          "networkScanUrl",
+          "deviceDiscoveryUrl",
+          "vulnerabilityUrl",
+          "threatDetectionUrl",
+          "accessToken",
+          "scanId",
+          "deviceId",
+          "threatId",
+          "userEmail",
+          "userPassword"
+        ]
+      },
+      "color": "#6366f1",
+      "isPrivate": false,
+      "metaSortKey": 1000000000001
+    },
+    {
+      "_id": "fld_gateway",
+      "_type": "request_group",
+      "parentId": "wrk_scandark",
+      "name": "00 — API Gateway",
+      "description": "Ponto de entrada unificado (:3000)",
+      "environment": {},
+      "metaSortKey": -6000000000000
+    },
+    {
+      "_id": "fld_auth",
+      "_type": "request_group",
+      "parentId": "wrk_scandark",
+      "name": "01 — service-auth",
+      "description": "Autenticação JWT (:3001)",
+      "environment": {},
+      "metaSortKey": -5000000000000
+    },
+    {
+      "_id": "fld_scan",
+      "_type": "request_group",
+      "parentId": "wrk_scandark",
+      "name": "02 — service-network-scan",
+      "description": "Varredura de rede (:3002)",
+      "environment": {},
+      "metaSortKey": -4000000000000
+    },
+    {
+      "_id": "fld_device",
+      "_type": "request_group",
+      "parentId": "wrk_scandark",
+      "name": "03 — service-device-discovery",
+      "description": "Fingerprint IoT (:3003)",
+      "environment": {},
+      "metaSortKey": -3000000000000
+    },
+    {
+      "_id": "fld_vuln",
+      "_type": "request_group",
+      "parentId": "wrk_scandark",
+      "name": "04 — service-vulnerability",
+      "description": "Avaliação CVE (:3004)",
+      "environment": {},
+      "metaSortKey": -2000000000000
+    },
+    {
+      "_id": "fld_threat",
+      "_type": "request_group",
+      "parentId": "wrk_scandark",
+      "name": "05 — service-threat-detection",
+      "description": "Detecção de intrusões (:3005)",
+      "environment": {},
+      "metaSortKey": -1000000000000
+    },
+    {
+      "_id": "req_gw_health",
+      "_type": "request",
+      "parentId": "fld_gateway",
+      "name": "Health Check",
+      "method": "GET",
+      "url": "{{ _.gatewayUrl }}/health",
+      "headers": [],
+      "body": {},
+      "authentication": {},
+      "metaSortKey": -6000000000000
+    },
+    {
+      "_id": "req_gw_register",
+      "_type": "request",
+      "parentId": "fld_gateway",
+      "name": "Register",
+      "method": "POST",
+      "url": "{{ _.gatewayUrl }}/auth/register",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"{{ _.userEmail }}\",\n  \"password\": \"{{ _.userPassword }}\",\n  \"name\": \"Security Analyst\",\n  \"role\": \"analyst\"\n}"
+      },
+      "authentication": {},
+      "metaSortKey": -5999999999999
+    },
+    {
+      "_id": "req_gw_login",
+      "_type": "request",
+      "parentId": "fld_gateway",
+      "name": "Login",
+      "description": "Copie accessToken da resposta para a variável accessToken no environment",
+      "method": "POST",
+      "url": "{{ _.gatewayUrl }}/auth/login",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"{{ _.userEmail }}\",\n  \"password\": \"{{ _.userPassword }}\"\n}"
+      },
+      "authentication": {},
+      "metaSortKey": -5999999999998
+    },
+    {
+      "_id": "req_gw_profile",
+      "_type": "request",
+      "parentId": "fld_gateway",
+      "name": "Profile",
+      "method": "GET",
+      "url": "{{ _.gatewayUrl }}/auth/profile",
+      "headers": [],
+      "body": {},
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -5999999999997
+    },
+    {
+      "_id": "req_gw_create_scan",
+      "_type": "request",
+      "parentId": "fld_gateway",
+      "name": "Create Scan",
+      "method": "POST",
+      "url": "{{ _.gatewayUrl }}/scans",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Full Assessment\",\n  \"type\": \"full_assessment\",\n  \"targetNetwork\": \"192.168.1.0\",\n  \"cidr\": 24\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -5999999999996
+    },
+    {
+      "_id": "req_gw_fingerprint",
+      "_type": "request",
+      "parentId": "fld_gateway",
+      "name": "Fingerprint Camera",
+      "method": "POST",
+      "url": "{{ _.gatewayUrl }}/devices/fingerprint",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"ipAddress\": \"192.168.1.100\",\n  \"hostname\": \"Hikvision IPC\",\n  \"openPorts\": [80, 554],\n  \"scanId\": \"{{ _.scanId }}\"\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -5999999999995
+    },
+    {
+      "_id": "req_gw_assess",
+      "_type": "request",
+      "parentId": "fld_gateway",
+      "name": "Assess Vulnerability",
+      "method": "POST",
+      "url": "{{ _.gatewayUrl }}/vulnerabilities/assess",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"deviceId\": \"{{ _.deviceId }}\",\n  \"ipAddress\": \"192.168.1.100\",\n  \"deviceType\": \"camera\",\n  \"openPorts\": [80, 554]\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -5999999999994
+    },
+    {
+      "_id": "req_gw_monitor",
+      "_type": "request",
+      "parentId": "fld_gateway",
+      "name": "Monitor Threats",
+      "method": "POST",
+      "url": "{{ _.gatewayUrl }}/threats/monitor",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"network\": \"192.168.1.0\",\n  \"cidr\": 24\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -5999999999993
+    },
+    {
+      "_id": "req_gw_threats_active",
+      "_type": "request",
+      "parentId": "fld_gateway",
+      "name": "Active Threats",
+      "method": "GET",
+      "url": "{{ _.gatewayUrl }}/threats/active",
+      "headers": [],
+      "body": {},
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -5999999999992
+    },
+    {
+      "_id": "req_auth_register",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Register",
+      "method": "POST",
+      "url": "{{ _.authUrl }}/auth/register",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"{{ _.userEmail }}\",\n  \"password\": \"{{ _.userPassword }}\",\n  \"name\": \"Security Analyst\",\n  \"role\": \"analyst\"\n}"
+      },
+      "authentication": {},
+      "metaSortKey": -5000000000000
+    },
+    {
+      "_id": "req_auth_login",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Login",
+      "method": "POST",
+      "url": "{{ _.authUrl }}/auth/login",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"{{ _.userEmail }}\",\n  \"password\": \"{{ _.userPassword }}\"\n}"
+      },
+      "authentication": {},
+      "metaSortKey": -4999999999999
+    },
+    {
+      "_id": "req_auth_profile",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Get Profile",
+      "method": "GET",
+      "url": "{{ _.authUrl }}/auth/profile",
+      "headers": [],
+      "body": {},
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -4999999999998
+    },
+    {
+      "_id": "req_scan_create",
+      "_type": "request",
+      "parentId": "fld_scan",
+      "name": "Create Scan",
+      "method": "POST",
+      "url": "{{ _.networkScanUrl }}/scans",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "x-user-id", "value": "00000000-0000-0000-0000-000000000001" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Scan Rede Doméstica\",\n  \"type\": \"full_assessment\",\n  \"targetNetwork\": \"192.168.1.0\",\n  \"cidr\": 24,\n  \"ports\": [22, 80, 443, 554, 3389]\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -4000000000000
+    },
+    {
+      "_id": "req_scan_list",
+      "_type": "request",
+      "parentId": "fld_scan",
+      "name": "List Scans",
+      "method": "GET",
+      "url": "{{ _.networkScanUrl }}/scans",
+      "headers": [{ "name": "x-user-id", "value": "00000000-0000-0000-0000-000000000001" }],
+      "body": {},
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -3999999999999
+    },
+    {
+      "_id": "req_scan_get",
+      "_type": "request",
+      "parentId": "fld_scan",
+      "name": "Get Scan by ID",
+      "method": "GET",
+      "url": "{{ _.networkScanUrl }}/scans/{{ _.scanId }}",
+      "headers": [{ "name": "x-user-id", "value": "00000000-0000-0000-0000-000000000001" }],
+      "body": {},
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -3999999999998
+    },
+    {
+      "_id": "req_device_fingerprint_cam",
+      "_type": "request",
+      "parentId": "fld_device",
+      "name": "Fingerprint — Camera",
+      "method": "POST",
+      "url": "{{ _.deviceDiscoveryUrl }}/devices/fingerprint",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"ipAddress\": \"192.168.1.100\",\n  \"macAddress\": \"00:1A:2B:3C:4D:5E\",\n  \"hostname\": \"Hikvision IPC Sala\",\n  \"openPorts\": [80, 554],\n  \"scanId\": \"{{ _.scanId }}\"\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -3000000000000
+    },
+    {
+      "_id": "req_device_fingerprint_router",
+      "_type": "request",
+      "parentId": "fld_device",
+      "name": "Fingerprint — Router",
+      "method": "POST",
+      "url": "{{ _.deviceDiscoveryUrl }}/devices/fingerprint",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"ipAddress\": \"192.168.1.1\",\n  \"hostname\": \"TP-Link Router\",\n  \"openPorts\": [80, 443],\n  \"scanId\": \"{{ _.scanId }}\"\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -2999999999999
+    },
+    {
+      "_id": "req_device_list",
+      "_type": "request",
+      "parentId": "fld_device",
+      "name": "List by Scan",
+      "method": "GET",
+      "url": "{{ _.deviceDiscoveryUrl }}/devices/scan/{{ _.scanId }}",
+      "headers": [],
+      "body": {},
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -2999999999998
+    },
+    {
+      "_id": "req_vuln_assess_cam",
+      "_type": "request",
+      "parentId": "fld_vuln",
+      "name": "Assess — Camera RTSP",
+      "method": "POST",
+      "url": "{{ _.vulnerabilityUrl }}/vulnerabilities/assess",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"deviceId\": \"{{ _.deviceId }}\",\n  \"ipAddress\": \"192.168.1.100\",\n  \"deviceType\": \"camera\",\n  \"openPorts\": [80, 554],\n  \"services\": [\n    { \"port\": 554, \"name\": \"rtsp\", \"banner\": \"Hikvision Streaming Server\" }\n  ]\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -2000000000000
+    },
+    {
+      "_id": "req_vuln_by_device",
+      "_type": "request",
+      "parentId": "fld_vuln",
+      "name": "Get by Device",
+      "method": "GET",
+      "url": "{{ _.vulnerabilityUrl }}/vulnerabilities/device/{{ _.deviceId }}",
+      "headers": [],
+      "body": {},
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -1999999999999
+    },
+    {
+      "_id": "req_vuln_summary",
+      "_type": "request",
+      "parentId": "fld_vuln",
+      "name": "Summary by Scan",
+      "method": "GET",
+      "url": "{{ _.vulnerabilityUrl }}/vulnerabilities/summary/{{ _.scanId }}",
+      "headers": [],
+      "body": {},
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -1999999999998
+    },
+    {
+      "_id": "req_threat_analyze_cam",
+      "_type": "request",
+      "parentId": "fld_threat",
+      "name": "Analyze — Camera Access",
+      "method": "POST",
+      "url": "{{ _.threatDetectionUrl }}/threats/analyze",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"sourceIp\": \"203.0.113.45\",\n  \"targetIp\": \"192.168.1.100\",\n  \"targetPort\": 554,\n  \"deviceType\": \"camera\",\n  \"protocol\": \"rtsp\",\n  \"eventType\": \"unauthorized_stream_access\"\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -1000000000000
+    },
+    {
+      "_id": "req_threat_analyze_ssh",
+      "_type": "request",
+      "parentId": "fld_threat",
+      "name": "Analyze — SSH Brute Force",
+      "method": "POST",
+      "url": "{{ _.threatDetectionUrl }}/threats/analyze",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"sourceIp\": \"192.168.1.200\",\n  \"targetIp\": \"192.168.1.1\",\n  \"targetPort\": 22,\n  \"protocol\": \"ssh\",\n  \"eventType\": \"ssh_brute_force\"\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -999999999999
+    },
+    {
+      "_id": "req_threat_monitor",
+      "_type": "request",
+      "parentId": "fld_threat",
+      "name": "Monitor Network",
+      "method": "POST",
+      "url": "{{ _.threatDetectionUrl }}/threats/monitor",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"network\": \"192.168.1.0\",\n  \"cidr\": 24\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -999999999998
+    },
+    {
+      "_id": "req_threat_list",
+      "_type": "request",
+      "parentId": "fld_threat",
+      "name": "List All",
+      "method": "GET",
+      "url": "{{ _.threatDetectionUrl }}/threats",
+      "headers": [],
+      "body": {},
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -999999999997
+    },
+    {
+      "_id": "req_threat_active",
+      "_type": "request",
+      "parentId": "fld_threat",
+      "name": "Active Threats",
+      "method": "GET",
+      "url": "{{ _.threatDetectionUrl }}/threats/active",
+      "headers": [],
+      "body": {},
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -999999999996
+    },
+    {
+      "_id": "req_threat_stats",
+      "_type": "request",
+      "parentId": "fld_threat",
+      "name": "Stats",
+      "method": "GET",
+      "url": "{{ _.threatDetectionUrl }}/threats/stats",
+      "headers": [],
+      "body": {},
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -999999999995
+    },
+    {
+      "_id": "req_threat_resolve",
+      "_type": "request",
+      "parentId": "fld_threat",
+      "name": "Resolve Threat",
+      "method": "PATCH",
+      "url": "{{ _.threatDetectionUrl }}/threats/{{ _.threatId }}/resolve",
+      "headers": [],
+      "body": {},
+      "authentication": { "type": "bearer", "token": "{{ _.accessToken }}" },
+      "metaSortKey": -999999999994
+    }
+  ]
+}

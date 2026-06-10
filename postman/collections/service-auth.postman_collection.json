@@ -1,0 +1,69 @@
+{
+  "info": {
+    "name": "ScanDark — service-auth",
+    "description": "Microserviço de autenticação JWT — porta 3001\n\nSwagger: http://localhost:3001/docs\n\nUsuário padrão (bootstrap): admin@your-company.com — configure via DEFAULT_USER_* no .env\n\nAutor: Francisco Stanley Rodrigues Albuquerque",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3001" },
+    { "key": "accessToken", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Register",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"novo@exemplo.com\",\n  \"password\": \"SecurePass123!\",\n  \"name\": \"Novo Usuário\",\n  \"role\": \"analyst\"\n}"
+        },
+        "url": "{{baseUrl}}/auth/register",
+        "description": "Registrar novo usuário. Roles: admin, analyst, viewer"
+      }
+    },
+    {
+      "name": "Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const res = pm.response.json();",
+              "if (res.accessToken) {",
+              "  pm.collectionVariables.set('accessToken', res.accessToken);",
+              "  console.log('Token salvo com sucesso');",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}"
+        },
+        "url": "{{baseUrl}}/auth/login",
+        "description": "Autenticar e receber JWT tokens. O accessToken é salvo automaticamente."
+      }
+    },
+    {
+      "name": "Get Profile",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/auth/profile",
+        "description": "Obter perfil do usuário autenticado. Requer Bearer token."
+      }
+    }
+  ]
+}

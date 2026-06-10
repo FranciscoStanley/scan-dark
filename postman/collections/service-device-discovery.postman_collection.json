@@ -1,0 +1,81 @@
+{
+  "info": {
+    "name": "ScanDark — service-device-discovery",
+    "description": "Fingerprint e classificação de dispositivos IoT — porta 3003\n\nSwagger: http://localhost:3003/docs\n\nAutor: Francisco Stanley Rodrigues Albuquerque",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3003" },
+    { "key": "accessToken", "value": "" },
+    { "key": "scanId", "value": "" },
+    { "key": "deviceId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Fingerprint Device — Camera",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const res = pm.response.json();",
+              "if (res.id) pm.collectionVariables.set('deviceId', res.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"ipAddress\": \"192.168.1.100\",\n  \"macAddress\": \"00:1A:2B:3C:4D:5E\",\n  \"hostname\": \"Hikvision IPC Sala\",\n  \"openPorts\": [80, 554],\n  \"scanId\": \"{{scanId}}\"\n}"
+        },
+        "url": "{{baseUrl}}/devices/fingerprint",
+        "description": "Classifica dispositivo por portas, hostname e MAC OUI"
+      }
+    },
+    {
+      "name": "Fingerprint Device — Router",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"ipAddress\": \"192.168.1.1\",\n  \"hostname\": \"TP-Link Router\",\n  \"openPorts\": [80, 443],\n  \"scanId\": \"{{scanId}}\"\n}"
+        },
+        "url": "{{baseUrl}}/devices/fingerprint"
+      }
+    },
+    {
+      "name": "Fingerprint Device — Smart TV",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"ipAddress\": \"192.168.1.50\",\n  \"hostname\": \"Samsung TV Living Room\",\n  \"openPorts\": [8080, 8008],\n  \"scanId\": \"{{scanId}}\"\n}"
+        },
+        "url": "{{baseUrl}}/devices/fingerprint"
+      }
+    },
+    {
+      "name": "List Devices by Scan",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": "{{baseUrl}}/devices/scan/{{scanId}}"
+      }
+    }
+  ]
+}

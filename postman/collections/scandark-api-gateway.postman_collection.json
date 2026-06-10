@@ -1,0 +1,261 @@
+{
+  "info": {
+    "name": "ScanDark — API Gateway (Full)",
+    "description": "Ponto de entrada unificado — todas as rotas via gateway na porta 3000\n\nSwagger: http://localhost:3000/docs\n\nFluxo: Login → demais endpoints (token salvo automaticamente)\n\nAutor: Francisco Stanley Rodrigues Albuquerque",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "accessToken", "value": "" },
+    { "key": "scanId", "value": "" },
+    { "key": "deviceId", "value": "" },
+    { "key": "threatId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01 — Health",
+      "item": [
+        {
+          "name": "Gateway Health",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": "{{baseUrl}}/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 — Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"novo@exemplo.com\",\n  \"password\": \"SecurePass123!\",\n  \"name\": \"Novo Usuário\",\n  \"role\": \"analyst\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', res.accessToken);",
+                  "  console.log('accessToken salvo');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/auth/profile"
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 — Network Scan",
+      "item": [
+        {
+          "name": "Create Scan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["const r = pm.response.json(); if (r.id) pm.collectionVariables.set('scanId', r.id);"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Full Assessment\",\n  \"type\": \"full_assessment\",\n  \"targetNetwork\": \"192.168.1.0\",\n  \"cidr\": 24\n}"
+            },
+            "url": "{{baseUrl}}/scans"
+          }
+        },
+        {
+          "name": "List Scans",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/scans"
+          }
+        },
+        {
+          "name": "Get Scan",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/scans/{{scanId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 — Device Discovery",
+      "item": [
+        {
+          "name": "Fingerprint Camera",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["const r = pm.response.json(); if (r.id) pm.collectionVariables.set('deviceId', r.id);"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ipAddress\": \"192.168.1.100\",\n  \"hostname\": \"Hikvision IPC\",\n  \"openPorts\": [80, 554],\n  \"scanId\": \"{{scanId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/devices/fingerprint"
+          }
+        },
+        {
+          "name": "List by Scan",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/devices/scan/{{scanId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 — Vulnerability",
+      "item": [
+        {
+          "name": "Assess Device",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deviceId\": \"{{deviceId}}\",\n  \"ipAddress\": \"192.168.1.100\",\n  \"deviceType\": \"camera\",\n  \"openPorts\": [80, 554]\n}"
+            },
+            "url": "{{baseUrl}}/vulnerabilities/assess"
+          }
+        },
+        {
+          "name": "Summary",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/vulnerabilities/summary/{{scanId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 — Threat Detection",
+      "item": [
+        {
+          "name": "Monitor Network",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["const r = pm.response.json(); if (Array.isArray(r) && r[0]?.id) pm.collectionVariables.set('threatId', r[0].id);"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"network\": \"192.168.1.0\",\n  \"cidr\": 24\n}"
+            },
+            "url": "{{baseUrl}}/threats/monitor"
+          }
+        },
+        {
+          "name": "Analyze Camera Intrusion",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sourceIp\": \"203.0.113.45\",\n  \"targetIp\": \"192.168.1.100\",\n  \"targetPort\": 554,\n  \"deviceType\": \"camera\",\n  \"protocol\": \"rtsp\"\n}"
+            },
+            "url": "{{baseUrl}}/threats/analyze"
+          }
+        },
+        {
+          "name": "Active Threats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/threats/active"
+          }
+        },
+        {
+          "name": "Stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/threats/stats"
+          }
+        },
+        {
+          "name": "Resolve Threat",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/threats/{{threatId}}/resolve"
+          }
+        }
+      ]
+    }
+  ]
+}

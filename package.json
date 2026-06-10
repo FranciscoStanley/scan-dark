@@ -1,0 +1,32 @@
+{
+  "name": "scan-dark",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Plataforma profissional de segurança de rede — microserviços com Clean Architecture",
+  "author": "Francisco Stanley Rodrigues Albuquerque",
+  "license": "MIT",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:cov": "turbo run test:cov",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "docker:up": "docker compose up -d --build",
+    "docker:build": "docker compose build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "docker:ps": "docker compose ps",
+    "db:migrate": "psql %DATABASE_URL% -f database/migrations/001_initial_schema.sql"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.0"
+}

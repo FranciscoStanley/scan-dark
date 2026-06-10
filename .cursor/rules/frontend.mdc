@@ -1,0 +1,27 @@
+---
+description: Padrões frontend Next.js ScanDark
+globs: frontend/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Frontend Next.js
+
+## Estrutura
+
+- `src/app/` — App Router pages
+- `src/lib/` — API client e utilitários
+- `src/contexts/` — React contexts (auth)
+- Componentes inline nas pages (sem over-abstraction)
+
+## API Client
+
+- Singleton `api` em `src/lib/api.ts`
+- Token JWT em localStorage
+- Todas as chamadas passam pelo API Gateway (porta 3000)
+
+## UI
+
+- Dark theme com Tailwind CSS
+- Classes utilitárias: `.card`, `.btn-primary`, `.input`, `.badge-*`
+- Ícones via lucide-react
+- Responsivo mobile-first

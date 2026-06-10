@@ -1,0 +1,139 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@layer base {
+  :root {
+    --bg-base: 224 71% 4%;
+    --bg-surface: 222 47% 7%;
+    --bg-elevated: 222 47% 10%;
+    --border: 217 33% 17%;
+    --text-primary: 210 40% 98%;
+    --text-secondary: 215 20% 55%;
+    --accent: 160 84% 39%;
+    --accent-glow: 160 84% 39%;
+    --danger: 0 72% 51%;
+    --warning: 38 92% 50%;
+    --info: 199 89% 48%;
+  }
+
+  * {
+    @apply border-[hsl(var(--border))];
+  }
+
+  body {
+    @apply bg-[hsl(var(--bg-base))] text-[hsl(var(--text-primary))] antialiased;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, hsl(160 84% 39% / 0.08), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 0%, hsl(199 89% 48% / 0.05), transparent);
+  }
+}
+
+@layer components {
+  .glass {
+    @apply rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl;
+  }
+
+  .glass-hover {
+    @apply glass transition-all duration-300 hover:border-emerald-500/20 hover:bg-white/[0.05];
+  }
+
+  .card {
+    @apply glass p-6;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all hover:from-emerald-500 hover:to-emerald-400 hover:shadow-emerald-500/30 disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-medium transition-all hover:bg-white/[0.08];
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-[hsl(var(--text-secondary))] transition-all hover:bg-white/[0.05] hover:text-white;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-red-500/10 px-5 py-2.5 text-sm font-medium text-red-400 transition-all hover:bg-red-500/20;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-[hsl(var(--text-primary))] outline-none transition-all placeholder:text-[hsl(var(--text-secondary))] focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20;
+  }
+
+  select.input {
+    @apply cursor-pointer;
+  }
+
+  select.input option {
+    background-color: hsl(var(--bg-elevated));
+    color: hsl(var(--text-primary));
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide;
+  }
+
+  .badge-critical {
+    @apply badge bg-red-500/15 text-red-400 ring-1 ring-red-500/20;
+  }
+
+  .badge-high {
+    @apply badge bg-orange-500/15 text-orange-400 ring-1 ring-orange-500/20;
+  }
+
+  .badge-medium {
+    @apply badge bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/20;
+  }
+
+  .badge-low {
+    @apply badge bg-blue-500/15 text-blue-400 ring-1 ring-blue-500/20;
+  }
+
+  .badge-active {
+    @apply badge bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/20;
+  }
+
+  .stat-glow-emerald {
+    box-shadow: 0 0 40px -10px hsl(160 84% 39% / 0.3);
+  }
+
+  .stat-glow-red {
+    box-shadow: 0 0 40px -10px hsl(0 72% 51% / 0.3);
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-300 bg-clip-text text-transparent;
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-[hsl(var(--text-secondary))] transition-all hover:bg-white/[0.05] hover:text-white;
+  }
+
+  .sidebar-link-active {
+    @apply sidebar-link bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20;
+  }
+
+  .grid-bg {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.3) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.3) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+}
+
+@layer utilities {
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}

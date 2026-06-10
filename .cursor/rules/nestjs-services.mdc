@@ -1,0 +1,38 @@
+---
+description: Padrões NestJS para microserviços ScanDark
+globs: services/**/*.ts
+alwaysApply: false
+---
+
+# NestJS Microservices
+
+## Controllers
+
+- Delegam para use cases, nunca contêm lógica de negócio
+- Convertem `Result.fail` em exceções HTTP apropriadas
+- Swagger decorators em todos os endpoints
+
+```typescript
+// ✅ GOOD
+const result = await this.createScan.execute(dto);
+if (Result.isFail(result)) throw new BadRequestException(result.error.message);
+return this.toResponse(result.value);
+
+// ❌ BAD — lógica no controller
+const hosts = await this.scanner.discoverHosts(network, cidr);
+```
+
+## Modules
+
+- Factory providers para use cases com injeção explícita
+- Um módulo por bounded context
+
+## Testes
+
+- Use cases testados com mocks de interfaces
+- Sem `@nestjs/testing` para unit tests de domínio
+- Vitest com `vi.fn()` para mocks
+
+## Artefatos sincronizados
+
+Ao alterar endpoints, use cases, proxy, bootstrap ou config: siga a skill `sync-artifacts` — atualize Swagger, testes e `docs/` na mesma entrega.

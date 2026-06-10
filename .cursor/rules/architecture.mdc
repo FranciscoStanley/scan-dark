@@ -1,0 +1,37 @@
+---
+description: Arquitetura e padrões do monorepo ScanDark
+alwaysApply: true
+---
+
+# ScanDark — Arquitetura
+
+## Serviços (nomenclatura service-*)
+
+```
+services/service-api-gateway       :3000
+services/service-auth                :3001
+services/service-network-scan        :3002
+services/service-device-discovery    :3003
+services/service-vulnerability       :3004
+services/service-threat-detection    :3005
+frontend                             :3100
+```
+
+## Skills do Projeto
+
+Consulte `.cursor/skills/` antes de implementar:
+- `clean-architecture` — Camadas domain/application/infrastructure/presentation
+- `solid-principles` — SOLID
+- `clean-code` — Nomenclatura, funções, testes
+- `software-architecture` — Decisões arquiteturais
+- `network-security` — Domínio de segurança
+- `sync-artifacts` — **Obrigatório ao alterar código:** manter Swagger, testes e documentação sincronizados
+
+## Documentação
+
+`docs/` contém arquitetura, API, services e frontend.
+
+## Clean Architecture
+
+Use cases na camada application, zero deps de framework no domain.
+Result pattern para erros. DTOs em @scandark/contracts.
