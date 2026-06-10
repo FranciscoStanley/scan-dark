@@ -1,5 +1,7 @@
 export const PROJECT_AUTHOR = {
   name: 'Francisco Stanley Rodrigues Albuquerque',
+  url: '',
+  email: '',
 } as const;
 
 export const SERVICE_PORTS = {

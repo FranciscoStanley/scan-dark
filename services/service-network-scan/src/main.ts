@@ -19,7 +19,7 @@ async function bootstrap() {
       'Descoberta de hosts, varredura de portas, auditoria WiFi/roteador, mDNS/SSDP/UPnP',
     )
     .setVersion('1.0')
-    .setContact(PROJECT_AUTHOR.name)
+    .setContact(PROJECT_AUTHOR.name, PROJECT_AUTHOR.url, PROJECT_AUTHOR.email)
     .addBearerAuth()
     .addTag('Network Scan')
     .build();

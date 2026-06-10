@@ -13,7 +13,7 @@ async function bootstrap() {
       'Detecção de intrusões: acessos indevidos a câmeras WiFi, RDP, SSH, movimentação lateral e dispositivos não autorizados',
     )
     .setVersion('1.0')
-    .setContact(PROJECT_AUTHOR.name)
+    .setContact(PROJECT_AUTHOR.name, PROJECT_AUTHOR.url, PROJECT_AUTHOR.email)
     .addBearerAuth()
     .addTag('Threat Detection')
     .build();

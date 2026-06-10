@@ -20,7 +20,7 @@ async function bootstrap() {
     .setTitle('ScanDark — API Gateway')
     .setDescription('Ponto de entrada unificado para todos os microserviços de segurança de rede')
     .setVersion('1.0')
-    .setContact(PROJECT_AUTHOR.name)
+    .setContact(PROJECT_AUTHOR.name, PROJECT_AUTHOR.url, PROJECT_AUTHOR.email)
     .addBearerAuth()
     .build();
 

@@ -11,7 +11,7 @@ async function bootstrap() {
     .setTitle('ScanDark — Device Discovery Service')
     .setDescription('Fingerprinting e classificação de dispositivos IoT, câmeras, TVs, roteadores')
     .setVersion('1.0')
-    .setContact(PROJECT_AUTHOR.name)
+    .setContact(PROJECT_AUTHOR.name, PROJECT_AUTHOR.url, PROJECT_AUTHOR.email)
     .addBearerAuth()
     .build();
 
