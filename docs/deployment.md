@@ -6,24 +6,18 @@ Guia de implantação do ScanDark em ambientes de staging e produção.
 
 ## Visão geral
 
-```
-                    ┌──────────────┐
-                    │   Reverse    │
-                    │    Proxy     │  (nginx / Traefik / ALB)
-                    │   TLS :443   │
-                    └──────┬───────┘
-                           │
-              ┌────────────┼────────────┐
-              │            │            │
-     ┌────────▼───┐ ┌─────▼─────┐ ┌────▼─────┐
-     │  frontend  │ │  gateway  │ │ services │
-     │   :3100    │ │   :3000   │ │ :3001-05 │
-     └────────────┘ └─────┬─────┘ └────┬─────┘
-                          │            │
-                    ┌─────▼────────────▼─────┐
-                    │  PostgreSQL / Redis /   │
-                    │       RabbitMQ          │
-                    └─────────────────────────┘
+```mermaid
+flowchart TB
+    RP["Reverse Proxy<br/>nginx / Traefik / ALB · TLS :443"]
+    FE["frontend :3100"]
+    GW["service-api-gateway :3000"]
+    SVC["microserviços<br/>:3001–:3005"]
+    DB[("PostgreSQL / Redis / RabbitMQ")]
+
+    RP --> FE
+    RP --> GW
+    GW --> SVC
+    SVC --> DB
 ```
 
 ---

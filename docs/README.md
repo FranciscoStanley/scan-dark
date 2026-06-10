@@ -102,13 +102,21 @@ Catálogo resumido: [services/README.md](./services/README.md)
 
 ## Fluxo de dados típico
 
-```
-1. Login (service-auth)           → JWT accessToken
-2. Create Scan (network-scan)     → scanId
-3. Fingerprint (device-discovery) → deviceId + classificação
-4. Assess (vulnerability)         → CVEs + risk score
-5. Monitor (threat-detection)     → alertas ativos
-6. Dashboard (frontend)           → visualização consolidada
+```mermaid
+sequenceDiagram
+    participant Auth as service-auth
+    participant Scan as network-scan
+    participant Dev as device-discovery
+    participant Vuln as vulnerability
+    participant Threat as threat-detection
+    participant FE as frontend
+
+    Auth->>Scan: JWT accessToken
+    Scan->>Dev: scanId
+    Dev->>Vuln: deviceId + classificação
+    Vuln->>Threat: CVEs + risk score
+    Threat->>FE: alertas ativos
+    FE->>FE: dashboard consolidado
 ```
 
 ---

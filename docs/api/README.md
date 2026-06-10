@@ -21,10 +21,17 @@ Acesso direto aos microserviços (portas 3001–3005) é útil para desenvolvime
 
 ### Fluxo JWT
 
-```
-POST /auth/register  →  201 Created
-POST /auth/login     →  200 { accessToken, refreshToken }
-GET  /*              →  Authorization: Bearer <accessToken>
+```mermaid
+sequenceDiagram
+    participant C as Cliente
+    participant GW as API Gateway
+
+    C->>GW: POST /auth/register
+    GW-->>C: 201 Created
+    C->>GW: POST /auth/login
+    GW-->>C: 200 accessToken + refreshToken
+    C->>GW: GET /* com Authorization Bearer
+    GW-->>C: 200 recurso protegido
 ```
 
 ### Endpoints públicos

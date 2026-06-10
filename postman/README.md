@@ -49,13 +49,13 @@ postman/
 
 O **service-auth** cria um usuário admin automaticamente na inicialização (padrão: `admin@your-company.com`). Configure `DEFAULT_USER_*` no `.env` e alinhe o environment Postman (`userEmail` / `userPassword`).
 
-```
-1. Login          → salva accessToken (usuário padrão já existe)
-3. Create Scan    → salva scanId
-4. Fingerprint    → salva deviceId
-5. Assess Vuln
-6. Monitor Threats → salva threatId
-7. Resolve Threat
+```mermaid
+flowchart LR
+    L["1. Login"] --> S["3. Create Scan"]
+    S --> F["4. Fingerprint"]
+    F --> A["5. Assess Vuln"]
+    A --> M["6. Monitor Threats"]
+    M --> R["7. Resolve Threat"]
 ```
 
 ## URLs dos serviços

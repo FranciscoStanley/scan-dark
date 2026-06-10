@@ -17,9 +17,11 @@
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",
     "docker:ps": "docker compose ps",
-    "db:migrate": "psql %DATABASE_URL% -f database/migrations/001_initial_schema.sql"
+    "db:migrate": "psql %DATABASE_URL% -f database/migrations/001_initial_schema.sql",
+    "screenshots": "node scripts/capture-screenshots.mjs"
   },
   "devDependencies": {
+    "playwright": "^1.60.0",
     "prettier": "^3.4.2",
     "turbo": "^2.3.3",
     "typescript": "^5.7.2"

@@ -36,14 +36,13 @@ Configuração por serviço em `vitest.config.ts` ou `package.json`.
 
 ### Pirâmide de testes
 
-```
-        ┌─────────┐
-        │  E2E    │  (futuro — Playwright)
-       ┌┴─────────┴┐
-       │ Integração │  (controllers + use cases)
-      ┌┴─────────────┴┐
-      │   Unitários   │  (domain, engines, use cases)
-      └───────────────┘
+```mermaid
+flowchart BT
+    U["Unitários<br/>domain · engines · use cases"]
+    I["Integração<br/>controllers + use cases"]
+    E["E2E<br/>(futuro — Playwright)"]
+
+    U --> I --> E
 ```
 
 ### O que testar

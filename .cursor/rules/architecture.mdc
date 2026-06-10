@@ -7,14 +7,18 @@ alwaysApply: true
 
 ## Serviços (nomenclatura service-*)
 
-```
-services/service-api-gateway       :3000
-services/service-auth                :3001
-services/service-network-scan        :3002
-services/service-device-discovery    :3003
-services/service-vulnerability       :3004
-services/service-threat-detection    :3005
-frontend                             :3100
+```mermaid
+flowchart LR
+    GW["service-api-gateway :3000"]
+    AU["service-auth :3001"]
+    NS["service-network-scan :3002"]
+    DD["service-device-discovery :3003"]
+    VU["service-vulnerability :3004"]
+    TH["service-threat-detection :3005"]
+    FE["frontend :3100"]
+
+    FE --> GW
+    GW --> AU & NS & DD & VU & TH
 ```
 
 ## Skills do Projeto

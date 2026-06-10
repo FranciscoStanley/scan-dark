@@ -45,6 +45,14 @@ src/
 | `/dashboard/vulnerabilities` | Vulnerabilidades por scan |
 | `/dashboard/license` | Status e ativação de licença (admin) |
 
+## Screenshots
+
+Galeria oficial em [`docs/assets/screenshots/`](../assets/screenshots/). Regenerar com o frontend rodando:
+
+```bash
+pnpm screenshots
+```
+
 ## API Client
 
 Todas as chamadas passam pelo gateway (`NEXT_PUBLIC_API_URL`):

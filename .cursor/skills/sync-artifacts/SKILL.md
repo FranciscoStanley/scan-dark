@@ -65,6 +65,7 @@ Não finalize a tarefa sem verificar os três pilares.
 | Ambiente | `docs/environment-variables.md`, `.env.example` |
 | Onboarding | `docs/getting-started.md`, `docs/README.md`, `README.md` |
 | Collections | `postman/collections/`, `postman/environments/` |
+| Screenshots UI | `docs/assets/screenshots/`, regenerar com `pnpm screenshots` |
 | Testes (guia) | `docs/testing.md` |
 
 ---

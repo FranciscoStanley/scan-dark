@@ -13,6 +13,7 @@
 ## Sumário
 
 - [Visão geral](#visão-geral)
+- [Interface](#interface)
 - [Funcionalidades](#funcionalidades)
 - [Arquitetura](#arquitetura)
 - [Quick Start](#quick-start)
@@ -36,6 +37,50 @@ Projetado como monorepo com **Clean Architecture** e princípios **SOLID**, cada
 
 ---
 
+## Interface
+
+Dashboard dark com glassmorphism, pensado para operações de segurança de rede.
+
+<p align="center">
+  <img src="./docs/assets/screenshots/dashboard-overview.png" alt="ScanDark — Dashboard Overview" width="920" />
+</p>
+<p align="center"><em>Dashboard — Security Operations Center (overview em tempo real)</em></p>
+
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <img src="./docs/assets/screenshots/landing.png" alt="Landing page" width="100%" /><br />
+      <sub><strong>Landing</strong> — apresentação da plataforma</sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="./docs/assets/screenshots/login.png" alt="Tela de login" width="100%" /><br />
+      <sub><strong>Login</strong> — autenticação JWT</sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="./docs/assets/screenshots/dashboard-threats.png" alt="Monitor de ameaças" width="100%" /><br />
+      <sub><strong>Ameaças</strong> — monitoramento de intrusões</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="./docs/assets/screenshots/dashboard-scans.png" alt="Gerenciamento de scans" width="100%" /><br />
+      <sub><strong>Scans</strong> — varredura e auditoria de rede</sub>
+    </td>
+    <td align="center">
+      <img src="./docs/assets/screenshots/dashboard-devices.png" alt="Inventário de dispositivos" width="100%" /><br />
+      <sub><strong>Dispositivos</strong> — fingerprint IoT</sub>
+    </td>
+    <td align="center">
+      <img src="./docs/assets/screenshots/dashboard-vulnerabilities.png" alt="Vulnerabilidades" width="100%" /><br />
+      <sub><strong>Vulnerabilidades</strong> — CVEs e remediação</sub>
+    </td>
+  </tr>
+</table>
+
+Mais telas e rotas: [`docs/frontend/README.md`](./docs/frontend/README.md)
+
+---
+
 ## Funcionalidades
 
 | Módulo | Capacidades |
@@ -51,26 +96,46 @@ Projetado como monorepo com **Clean Architecture** e princípios **SOLID**, cada
 
 ## Arquitetura
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    frontend (Next.js :3100)                  │
-└─────────────────────────────┬───────────────────────────────┘
-                              │ REST / JWT
-┌─────────────────────────────▼───────────────────────────────┐
-│              service-api-gateway (:3000)                     │
-└───┬─────────┬─────────┬─────────┬─────────┬─────────────────┘
-    │         │         │         │         │
- :3001     :3002     :3003     :3004     :3005
-  auth   net-scan   devices    vuln     threats
+```mermaid
+flowchart TB
+    FE["frontend<br/>Next.js :3100"]
+    GW["service-api-gateway<br/>:3000"]
+    AUTH["service-auth<br/>:3001"]
+    SCAN["service-network-scan<br/>:3002"]
+    DEV["service-device-discovery<br/>:3003"]
+    VULN["service-vulnerability<br/>:3004"]
+    THR["service-threat-detection<br/>:3005"]
+
+    FE -->|"REST / JWT"| GW
+    GW --> AUTH
+    GW --> SCAN
+    GW --> DEV
+    GW --> VULN
+    GW --> THR
 ```
 
-Cada microserviço segue quatro camadas:
+Cada microserviço segue quatro camadas (dependências apontam para dentro):
 
-```
-domain/ → application/ → infrastructure/ → presentation/
+```mermaid
+flowchart BT
+    subgraph presentation["presentation/"]
+        P["Controllers · Guards · Strategies"]
+    end
+    subgraph application["application/"]
+        A["Use Cases"]
+    end
+    subgraph domain["domain/"]
+        D["Entities · Interfaces · Domain Services"]
+    end
+    subgraph infrastructure["infrastructure/"]
+        I["TypeORM · Scanners · JWT · HTTP clients"]
+    end
+
+    presentation --> application --> domain
+    infrastructure --> domain
 ```
 
-Diagramas, bounded contexts e decisões arquiteturais: [`docs/architecture.md`](./docs/architecture.md)
+Diagramas detalhados, bounded contexts e ADRs: [`docs/architecture.md`](./docs/architecture.md)
 
 ---
 
