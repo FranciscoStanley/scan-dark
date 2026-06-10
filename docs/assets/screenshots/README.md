@@ -10,4 +10,9 @@ Com o frontend em execução (`pnpm --filter @scandark/web dev`):
 node scripts/capture-screenshots.mjs
 ```
 
-Variável opcional: `SCREENSHOT_BASE_URL` (padrão: `http://localhost:3100`).
+Variáveis opcionais:
+
+- `SCREENSHOT_BASE_URL` — frontend (padrão: `http://localhost:3100`)
+- `SCREENSHOT_API_URL` — API mockada pelo Playwright (padrão: `http://localhost:3000`)
+
+Os mocks interceptam **somente** chamadas à API (`localhost:3000`), nunca as rotas do Next.js (`/dashboard/*`).
