@@ -16,7 +16,7 @@
     "@nestjs/platform-express": "^10.4.15",
     "@nestjs/swagger": "^8.1.0",
     "@nestjs/typeorm": "^10.0.2",
-    "@nestjs/microservices": "^10.4.15",
+    "@nestjs/microservices": "^11.2.5",
     "@scandark/config": "workspace:*",
     "@scandark/contracts": "workspace:*",
     "@scandark/nest-auth": "workspace:*",
